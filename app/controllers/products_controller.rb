@@ -44,6 +44,10 @@ class ProductsController < ApplicationController
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @product.errors, status: :unprocessable_entity }
       end
+    rescue ActiveRecord::StaleObjectError => _error
+      @product.errors.add(:base, "Oops. Looks like the product has changed since you last opened it. Please refresh the page")
+      format.html { render :edit, status: :unprocessable_entity }
+      format.json { render json: @product.errors, status: :unprocessable_entity }
     end
   end
 
@@ -64,6 +68,6 @@ class ProductsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def product_params
-      params.require(:product).permit(:name, :description, :weight_grams, :price_cents)
+      params.require(:product).permit(:name, :description, :weight_grams, :price_cents, :lock_version)
     end
 end
